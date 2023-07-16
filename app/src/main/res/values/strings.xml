@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BookReader</string>
+    <string name="create_account">Please enter a valid email and password thai is at least 6 characters</string>
+</resources>
