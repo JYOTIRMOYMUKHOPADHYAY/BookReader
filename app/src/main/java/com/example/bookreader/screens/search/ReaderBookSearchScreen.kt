@@ -46,6 +46,7 @@ import coil.request.ImageRequest
 import com.example.bookreader.Components.InputField
 import com.example.bookreader.Components.ReaderAppBar
 import com.example.bookreader.model.Item
+import com.example.bookreader.navigation.ReaderScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,7 +114,9 @@ fun BookList(navController: NavController, viewModel: BookSearchViewModel = hilt
 @Composable
 fun BookRow(book: Item, navController: NavController) {
     Card(modifier = Modifier
-        .clickable { }
+        .clickable {
+            navController.navigate(ReaderScreen.DetailScreen.name+ "/" + book.id)
+        }
         .fillMaxWidth()
         .padding(10.dp), shape = RectangleShape, elevation = CardDefaults.cardElevation(7.dp)) {
         Row(modifier = Modifier.padding(5.dp), verticalAlignment = Alignment.Top) {
