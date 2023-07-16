@@ -27,6 +27,7 @@ class BookSearchViewModel @Inject constructor(private val repository: BookReposi
     init {
         searchBooks("android")
     }
+
     fun searchBooks(query: String) {
         viewModelScope.launch() {
             isLoading = true
@@ -38,16 +39,19 @@ class BookSearchViewModel @Inject constructor(private val repository: BookReposi
                     is Resource.Success -> {
                         list = response.data!!
                         Log.d("LISTDATA", "searchBooks: ${list.toString()}")
-                        if(list.isNotEmpty()) isLoading = false
+                        if (list.isNotEmpty()) isLoading = false
                     }
+
                     is Resource.Error -> {
                         isLoading = false
 
-                    }else -> {
-                    isLoading = false
+                    }
+
+                    else -> {
+                        isLoading = false
                     }
                 }
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 isLoading = false
                 Log.d("searchBooks_ERR", "searchBooks: FAILED TO GET BOOKS ${e.message.toString()}")
             }
