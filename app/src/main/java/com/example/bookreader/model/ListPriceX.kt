@@ -1,6 +1,6 @@
 package com.example.bookreader.model
 
 data class ListPriceX(
-    val amountInMicros: Int,
+    val amountInMicros: Long,
     val currencyCode: String
 )
