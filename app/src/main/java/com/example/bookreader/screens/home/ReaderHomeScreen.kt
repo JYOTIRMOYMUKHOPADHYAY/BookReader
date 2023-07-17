@@ -3,6 +3,8 @@ package com.example.bookreader.screens.home
 
 import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.bookreader.Components.FABContent
 import com.example.bookreader.Components.ListCard
@@ -44,7 +47,10 @@ import java.util.Locale
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(navController: NavController = NavController(LocalContext.current)) {
+fun Home(
+    navController: NavController = NavController(LocalContext.current),
+    viewModel: HomeScreenViewModel = hiltViewModel()
+) {
 
     Scaffold(
         topBar = {
@@ -61,30 +67,37 @@ fun Home(navController: NavController = NavController(LocalContext.current)) {
                 .padding(it)
                 .fillMaxSize()
         ) {
-            HomeContent(navController)
+            HomeContent(navController, viewModel)
         }
     }
 }
 
 
 @Composable
-fun HomeContent(navController: NavController) {
+fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
     val email = FirebaseAuth.getInstance().currentUser?.email
     val currentUsername =
         if (!email.isNullOrEmpty()) email?.split(
             "@"
         )?.get(0) else "N/A"
 
-    var listOfBooks = listOf<MBook>(
-        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
-        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
-        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
-        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
-        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
-        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
-        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
+//    var listOfBooks = listOf<MBook>(
+//        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
+//        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
+//        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
+//        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
+//        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
+//        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
+//        MBook("sdfds", "sadrfsdaf", "Asdsadasd", "ASdasd"),
+//    )
 
-    )
+    var listOfBooks = emptyList<MBook>()
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    if (!viewModel.data.value.data.isNullOrEmpty()) {
+        listOfBooks = viewModel.data.value.data!!.toList().filter { mBook ->
+            mBook.userId == currentUser?.uid.toString()
+        }
+    }
     Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.Top) {
         Row(
             modifier = Modifier
@@ -130,21 +143,25 @@ fun HomeContent(navController: NavController) {
 
 @Composable
 fun BookListArea(listOfBooks: List<MBook>, navController: NavController) {
-    HorizontalScrollableComponent(listOfBooks){
+    HorizontalScrollableComponent(listOfBooks) {
         //TODO ONCLICK ON CARD NAVIGATE DETAILS
+        Log.d("it", "BookListArea: ${it.toString()}")
+        navController.navigate(ReaderScreen.UpdateScreen.name + "/$it")
     }
 }
 
 @Composable
 fun HorizontalScrollableComponent(listOfBooks: List<MBook>, onCardPress: (String) -> Unit) {
     val scrollState = rememberScrollState()
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .heightIn(580.dp)
-        .horizontalScroll(scrollState)) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(780.dp)
+            .horizontalScroll(scrollState)
+    ) {
         for (book in listOfBooks) {
-            ListCard(book){
-                onCardPress(it)
+            ListCard(book) {
+                onCardPress(book.googleBookId.toString())
                 Log.d("OCC", "HorizontalScrollableComponent: ${it.toString()}")
             }
         }

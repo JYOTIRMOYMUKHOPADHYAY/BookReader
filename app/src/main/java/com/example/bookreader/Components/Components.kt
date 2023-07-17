@@ -1,5 +1,9 @@
 package com.example.bookreader.Components
 
+import android.view.MotionEvent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,13 +39,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -214,9 +224,12 @@ fun ReaderAppBar(
                         imageVector = icon,
                         contentDescription = "arrow back",
                         tint = Color.Red.copy(alpha = 0.7f),
-                        modifier = Modifier.clickable {
-                            onBackArrowClicked.invoke()
-                        }.padding(end = 20.dp),)
+                        modifier = Modifier
+                            .clickable {
+                                onBackArrowClicked.invoke()
+                            }
+                            .padding(end = 20.dp),
+                    )
                 }
                 Text(
                     text = title,
@@ -310,7 +323,7 @@ fun ListCard(
             .height(232.dp)
             .width(202.dp)
             .clickable {
-                onPressDetails.invoke(book.title.toString())
+                onPressDetails.invoke(book.id.toString())
             }
     ) {
         Column(
@@ -325,7 +338,7 @@ fun ListCard(
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://images.unsplash.com/photo-1635846650676-55b9ba247172?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=627&q=80")
+                        .data(book.photoUrl.toString())
                         .crossfade(true).build(),
                     contentDescription = "Icon Image",
                     contentScale = ContentScale.Crop,
@@ -402,6 +415,59 @@ fun RoundedButton(
                 style = TextStyle(color = Color.White),
                 modifier = Modifier.padding(5.dp),
                 textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+
+//Rating Bar
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun RatingBar(
+    modifier: Modifier = Modifier,
+    rating: Int,
+    onPressRating: (Int) -> Unit
+) {
+    var ratingState by remember {
+        mutableStateOf(rating)
+    }
+
+    var selected by remember {
+        mutableStateOf(false)
+    }
+    val size by animateDpAsState(
+        targetValue = if (selected) 42.dp else 34.dp,
+        spring(Spring.DampingRatioMediumBouncy)
+    )
+
+    Row(
+        modifier = Modifier.width(280.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        for (i in 1..5) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_baseline_star_24),
+                contentDescription = "star",
+                modifier = modifier
+                    .width(size)
+                    .height(size)
+                    .pointerInteropFilter {
+                        when (it.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                selected = true
+                                onPressRating(i)
+                                ratingState = i
+                            }
+                            MotionEvent.ACTION_UP -> {
+                                selected = false
+                            }
+                        }
+                        true
+                    },
+                tint = if (i <= ratingState) Color(0xFFFFD700) else Color(0xFFA2ADB1)
             )
         }
     }

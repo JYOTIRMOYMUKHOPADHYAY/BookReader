@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ReaderApp(){
+    val scrollState = rememberScrollState()
     Surface(
         modifier = Modifier
             .fillMaxSize(),
